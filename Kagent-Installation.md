@@ -6,43 +6,28 @@ Set the Gemini API key as an environment variable.
 export GEMINI_API_KEY="your-api-key-here"
 ```
 
-Download the kagent CLI. By default, the latest version 0.10.2 of kagent is installed.
+Download the kagent CRDs. By default, the latest version 0.10.2 of kagent is installed.
 
 ```bash
-brew install kagent
+helm install kagent-crds \
+  oci://ghcr.io/kagent-dev/kagent/helm/kagent-crds \
+  --version 0.10.2 \
+  --namespace kagent \
+  --create-namespace \
+  --wait
 ```
 
-For default agents use this command
+Install Kagent with Gemini 3.5 Flash
 
 ```bash
-kagent install --profile demo
-```
-
-Create a Secret for Gemini First 
-
-```bash
-kubectl create secret generic gemini-api-key \
-  -n kagent \
-  --from-literal=GOOGLE_API_KEY="$GEMINI_API_KEY"
-```
-
-Configure Gemini as the model provider 
-
-```yaml
-apiVersion: kagent.dev/v1alpha2
-kind: ModelConfig
-metadata:
-  name: gemini
-  namespace: kagent
-spec:
-  provider: Gemini
-  model: gemini-3.5-flash
-  apiKeySecret: gemini-api-key
-  apiKeySecretKey: GOOGLE_API_KEY
-  gemini: {}
-```
-```bash
-kubectl apply -f gemini-modelconfig.yaml
+helm install kagent \
+  oci://ghcr.io/kagent-dev/kagent/helm/kagent \
+  --version 0.10.2 \
+  --namespace kagent \
+  --wait \
+  --set providers.default=gemini \
+  --set providers.gemini.apiKey="$GEMINI_API_KEY" \
+  --set providers.gemini.model="gemini-3.5-flash"
 ```
 
 Accessing the kagent dashboard (UI) 
